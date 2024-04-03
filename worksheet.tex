@@ -1,27 +1,109 @@
 \documentclass{dcbl/challenge}
 
-\setdoctitle{Der Titel meines Dokuments}
+\setdoctitle{Using Libraries}
 \setdocauthor{Stephan Bökelmann}
 \setdocemail{sboekelmann@ep1.rub.de}
 \setdocinstitute{AG Physik der Hadronen und Kerne}
-
+\usepackage{listings}
+\usepackage{hyperref}
 
 \begin{document}
 
-Jedes Challenge-Blatt beginnt mit einer kurzen Einleitung, die einen Kontext für den jeweiligen Zettel setzt. 
 
 \section*{Aufgaben}
 \begin{aufgabe}
-    Löse die Gleichung $x^2 - 5x + 6 = 0$.
+    Research the following C-standard library functions on this website: \href{https://en.cppreference.com/w/c/header}{cppreference.com}
+    Write a program, that uses the following functions:
+    \begin{enumerate}
+        \item \texttt{double pow(double, double)} from \texttt{math.h}
+        \item \texttt{double sqrt(double)} from \texttt{math.h}
+        \item \texttt{double sin(double)} from \texttt{math.h}
+        \item \texttt{int rand(void)} from \texttt{stdlib.h}
+        \item \texttt{int putchar(int)} from \texttt{stdio.h}
+        \item \texttt{int getchar(void)} from \texttt{stdio.h}
+        \item \texttt{int printf(const char *, ...)} from \texttt{stdio.h}
+        \item \texttt{int scanf(const char *, ...)} from \texttt{stdio.h}
+        \item \texttt{time\_t time(time\_t *arg)} from \texttt{time.h}
+        \item \texttt{double difftime(time\_t, time\_t)} from \texttt{time.h}
+    \end{enumerate}
+    For which of these did you need to link the libraries manually?
 \end{aufgabe}
 
-\begin{aufgabe}[Für Fortgeschrittene]
-    Beweise den Satz des Pythagoras.
+\begin{aufgabe}
+    Now install a non-standard library.
+    Let's take \texttt{libjansson} for example. 
+    It can be installed with \texttt{sudo apt install libjansson-dev}.
+    We can use libjansson to serialize and deserialize structs to JSON and vice versa.
+    Use the following C-code:
+    \begin{lstlisting}
+    #include <jansson.h>
+    #include <stdio.h>
+    
+    typedef struct {
+        int id;
+        char name[20];
+    } person_t;
+    
+    int main(void) {
+        person_t person = {1, "John Doe"};
+    
+        // new JSON-dataobject
+        json_t *root = json_object();
+        
+        // add data
+        json_object_set_new(root, "id", json_integer(person.id));
+        json_object_set_new(root, "name", json_string(person.name));
+    
+        // convert to string
+        char *json_string = json_dumps(root, JSON_ENCODE_ANY);
+    
+        // write to stdout
+        printf("%s\n", json_string);
+    
+        // cleanup
+        free(json_string);
+        json_decref(root);
+    
+        return 0;
+    }
+    \end{lstlisting}  
+    How do you need to link the library for it to compile?      
 \end{aufgabe}
 
-\section*{Anmerkungen}
+\begin{aufgabe}
+    Finally, we'd like to use an open source project and compile it ourselves. 
+    We start by cloning the project \texttt{curl}, which is a library for transferring data over the internet.
+    \begin{lstlisting}
+        git clone https://github.com/curl/curl.git
+    \end{lstlisting}
+    Since this is a complex project, a simple \texttt{makefile} doesn't do the trick anylonger, but we will actually have to run a script to generate a \texttt{makefile} for it.
+    For this we need to install some dependencies:
+    \begin{lstlisting}
+        sudo apt install libssl-dev build-essential autoconf libtool -y
+    \end{lstlisting}
+    This command also installs the \texttt{openssl}-library.
+    Let's build the project:
+    \begin{lstlisting}
+        cd curl
+        ./buildconf
+        ./configure --with-openssl
+        make
+    \end{lstlisting}
+    Now we can install the library:
+    \begin{lstlisting}
+        sudo make install
+    \end{lstlisting}
+
+    To use the library, we'd like to write a program, that takes a \texttt{URL}, downloads its contents and writes it to a file.
+    Use the following code for the program: \href{https://gist.github.com/bjoekeldude/af6b9ff61d55a550f31aa22eb3e596ca}{Clone this Gist}.
+    You can now compile the program with only one line: What does this line look like?
+    Run the program with the following command: \texttt{./<name of your program> <URL> <file>}.
+\end{aufgabe}
+
+
+\section*{Annotations}
 \begin{enumerate}
-    \item Link zu einem YouTube-Video: \url{https://www.youtube.com}
+    \item Introduction to make and autotools: \url{https://www.youtube.com/watch?v=WFLvcMiG38w\&pp=ygUJYXV0b3Rvb2xz}
 \end{enumerate}
 
 \end{document}
